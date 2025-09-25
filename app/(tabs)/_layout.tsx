@@ -1,45 +1,27 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Clients from './clients';
+import Movies from './movies';
+import Server from './server';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+const TopTabs = createMaterialTopTabNavigator();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function TabsLayout() {
 
+  const insets = useSafeAreaInsets();
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <View style={{ flex: 1, paddingTop: insets.top }}>
+      <TopTabs.Navigator
+        initialRouteName='server'
+        screenOptions={{
+          tabBarIndicatorStyle: { backgroundColor: '#3b82f6' },
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <TopTabs.Screen name="server" component={Server}  options={{ title: 'Сервер' }} />
+        <TopTabs.Screen name="clients" component={Clients} options={{ title: 'Список подключившихся' }} />
+        <TopTabs.Screen name="movies"  component={Movies}  options={{ title: 'Фильмы' }} />
+      </TopTabs.Navigator>
+    </View>
   );
 }

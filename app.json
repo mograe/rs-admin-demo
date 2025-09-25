@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "rs-admin-demo",
+    "name": "RS Admin Demo",
     "slug": "rs-admin-demo",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "rsadmindemo",
     "userInterfaceStyle": "automatic",
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.mograne.rsadmindemo"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "79ecd991-2f97-4457-a7c2-5b1963a77ec6"
+      }
     }
   }
 }
