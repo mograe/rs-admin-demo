@@ -1,13 +1,15 @@
 // app/(tabs)/server.tsx
-import React, { useEffect, useState } from 'react';
+import { useSocket } from '@/contexts/SocketProvider';
+import React from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * 👉 В реальном приложении кавычки-заглушки (localhost, 3001, 0 клиентов, …)
@@ -15,58 +17,41 @@ import {
  *    Ниже всё сохраняется локально, чтобы экран сразу был интерактивным.
  */
 export default function Server() {
-  const [isRunning, setIsRunning] = useState(false);
-  const [serverIp, setServerIp] = useState('192.168.0.42');
-  const [serverPort, setServerPort] = useState(3001);
-  const [clientCount, setClientCount] = useState(0);
-  const [logs, setLogs] = useState<string[]>([]);
+  const {connected, isConnecting, connect, disconnect, serverUrl, clients, logs} = useSocket();
 
+  const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const DIAMETER = Math.max(160, Math.min(0.35 * Math.min(width, height), 260));
   const FONT     = DIAMETER * 0.22;     // ≈ 22 % диаметра
 
-  /** Подписка на события сервера (заглушка) */
-  useEffect(() => {
-    // TODO: заменить на socket.io-client:
-    // socket.on('server-info', (info) => { setServerIp(info.ip); ... })
-    // socket.on('client-count', (n) => setClientCount(n));
-    // socket.on('log', (line) => setLogs((prev) => [line, ...prev.slice(0, 49)]));
+  const onPress = connected ? disconnect : connect;
+  const label = connected ? 'STOP' : (isConnecting ? '...' : 'START');
+  const color = connected ? '#f59e0b' : (isConnecting ? '#9ca3af' : '#10b981');
 
-    // ↙ для демо каждые 5 с «приходит» новый лог
-    const timer = setInterval(() => {
-      setLogs(prev => [`[${new Date().toLocaleTimeString()}] ping`, ...prev.slice(0, 49)]);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const toggleServer = () => {
-    // TODO: socket.emit(isRunning ? 'stop' : 'start');
-    setIsRunning(prev => !prev);
-    appendLog(isRunning ? '>>> Server stopped' : '>>> Server started');
-  };
-
-  const appendLog = (text: string) =>
-    setLogs(prev => [text, ...prev.slice(0, 49)]); // максимум 50 строк
+  let hostPort = serverUrl;
+  try {hostPort = new URL(serverUrl).host; } catch {}
 
   return (
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{               /* выравниваем всё по центру */
         alignItems: 'center',
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 24,
       }}
       nestedScrollEnabled                    /* чтобы внутренний лог тоже скроллился */
     >
-      {/* Кнопка Start/Stop */}
+      {/* Кнопка CONNECT/DISCONNECT */}
       <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={toggleServer}
+        activeOpacity={0.85}
+        onPress={onPress}
         style={[
           styles.button,
             {
             width: DIAMETER,
             height: DIAMETER,
             borderRadius: DIAMETER / 2,
-            backgroundColor: isRunning ? '#10b981' : '#ef4444',
+            backgroundColor: color,
           },
         ]}
       >
@@ -75,15 +60,15 @@ export default function Server() {
             numberOfLines={1}
             adjustsFontSizeToFit
         >
-                {isRunning ? 'STOP' : 'START'}
+                {label}
         </Text>
       </TouchableOpacity>
 
       {/* Информация о сервере */}
       <View style={styles.infoBox}>
-        <InfoRow label="Статус"   value={isRunning ? 'Запущен' : 'Остановлен'} />
-        <InfoRow label="IP:Порт"  value={`${serverIp}:${serverPort}`} />
-        <InfoRow label="Клиентов" value={clientCount.toString()} />
+        <InfoRow label="Статус"   value={connected ? 'Подключено' : (isConnecting ? 'Подключаемся…' : 'Отключено')} />
+        <InfoRow label="IP:Порт"  value={hostPort} />
+        <InfoRow label="Клиентов" value={String(clients?. length ?? 0)} />
       </View>
 
       {/* Логи */}
