@@ -1,3 +1,4 @@
+import { usePlayer } from '@/contexts/PlayerProvider';
 import React, { useState } from 'react';
 import {
   FlatList,
@@ -27,11 +28,12 @@ const demoMovies: Movie[] = [
 
 export default function MoviesScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const {setCurrentTitle} = usePlayer();
 
   const selectMovie = (movie: Movie) => {
     setSelectedId(movie.id);
+    setCurrentTitle(movie.title);
     // TODO: socket.emit('selectMovie', movie.id);
-    //       update контекст (currentMovie) для BottomBar
   };
 
   const renderItem = ({ item }: ListRenderItemInfo<Movie>) => {

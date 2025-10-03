@@ -28,7 +28,7 @@ export const useSocket = () => {
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   // URL сервера: поменяйте на IP вашего сервера (планшет/роутер/Pi)
-  const [serverUrl, setServerUrl] = useState('http://192.168.0.42:3001');
+  const [serverUrl, setServerUrl] = useState('http://192.168.1.100:3001');
   const [connected, setConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
